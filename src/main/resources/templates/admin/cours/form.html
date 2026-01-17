@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div th:with="content='admin/cours/form :: content'"></div>
+
+<div th:fragment="content">
+    <h2>Nouveau cours</h2>
+
+<form method="post" th:action="@{/admin/cours/save}">
+    <div class="mb-3">
+        <input class="form-control"
+               name="code"
+               placeholder="Code du cours"
+               required>
+    </div>
+
+    <div class="mb-3">
+        <input class="form-control"
+               name="titre"
+               placeholder="Titre"
+               required>
+    </div>
+
+    <div class="mb-3">
+        <textarea class="form-control"
+                  name="description"
+                  placeholder="Description"></textarea>
+    </div>
+
+    <!-- FORMATEUR -->
+    <div class="mb-3">
+        <select name="formateur.id" class="form-select">
+            <option value="">-- Choisir un formateur --</option>
+            <option th:each="f : ${formateurs}"
+                    th:value="${f.id}"
+                    th:text="${f.nom}">
+            </option>
+        </select>
+    </div>
+
+
+
+    <button class="btn btn-success">Enregistrer</button>
+</form>
+
+</div>
+
+</body>
+</html>

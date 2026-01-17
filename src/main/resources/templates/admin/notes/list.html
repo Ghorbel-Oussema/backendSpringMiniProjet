@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+<div>
+
+    <h2>Liste des notes</h2>
+
+   <!-- <a class="btn btn-primary mb-3"
+       th:href="@{/admin/notes/new}">
+        Ajouter une note
+    </a> --> 
+
+    <!-- TABLE -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Étudiant</th>
+            <th>Cours</th>
+            <th>Note</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="n : ${notes.content}">
+            <td th:text="${n.etudiant.nom}"></td>
+            <td th:text="${n.cours.titre}"></td>
+            <td th:text="${n.valeur}"></td>
+            <td>
+
+                <button class="btn btn-info btn-sm view-btn"
+                        th:attr="data-id=${n.id}">
+                    Voir
+                </button>
+
+                <button class="btn btn-warning btn-sm edit-btn"
+                        th:attr="data-id=${n.id}">
+                    Modifier
+                </button>
+
+                <a class="btn btn-danger btn-sm"
+                   th:href="@{/admin/notes/delete/{id}(id=${n.id})}">
+                    Supprimer
+                </a>
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- PAGINATION -->
+    <nav>
+        <ul class="pagination">
+
+            <li class="page-item"
+                th:classappend="${notes.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/notes(page=${notes.number-1})}">
+                    Précédent
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, notes.totalPages-1)}"
+                th:classappend="${i == notes.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{/admin/notes(page=${i})}">
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:classappend="${notes.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/notes(page=${notes.number+1})}">
+                    Suivant
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+    <!-- MODAL EDIT -->
+    <div class="modal fade" id="editModal">
+        <div class="modal-dialog">
+            <form method="post" th:action="@{/admin/notes/update}">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5>Modifier Note</h5>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="nid">
+
+                        <input type="number" step="0.01"
+                               class="form-control mb-2"
+                               name="valeur" id="nvaleur">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-primary">Enregistrer</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VIEW -->
+    <div class="modal fade" id="viewModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5>Détails Note</h5>
+                </div>
+
+                <div class="modal-body">
+                    <p><b>Étudiant :</b> <span id="v_etudiant"></span></p>
+                    <p><b>Cours :</b> <span id="v_cours"></span></p>
+                    <p><b>Note :</b> <span id="v_note"></span></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.onclick = () => {
+            fetch("/admin/notes/edit/" + btn.dataset.id)
+                .then(r => r.json())
+                .then(n => {
+                    nid.value = n.id;
+                    nvaleur.value = n.valeur;
+                    new bootstrap.Modal(editModal).show();
+                });
+        };
+    });
+
+    document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.onclick = () => {
+            fetch("/admin/notes/edit/" + btn.dataset.id)
+                .then(r => r.json())
+                .then(n => {
+                    v_etudiant.textContent = n.etudiant.nom;
+                    v_cours.textContent = n.cours.titre;
+                    v_note.textContent = n.valeur;
+                    new bootstrap.Modal(viewModal).show();
+                });
+        };
+    });
+
+});
+</script>
+
+</body>
+</html>

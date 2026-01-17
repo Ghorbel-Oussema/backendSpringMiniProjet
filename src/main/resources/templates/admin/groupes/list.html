@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+<div>
+
+    <h2>Liste des groupes</h2>
+
+    <a class="btn btn-primary mb-3"
+       th:href="@{/admin/groupes/new}">
+        Ajouter un groupe
+    </a>
+
+    <!-- Recherche -->
+    <form class="row mb-3">
+        <div class="col-md-4">
+            <input class="form-control"
+                   name="keyword"
+                   th:value="${keyword}"
+                   placeholder="Rechercher par nom...">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary">Rechercher</button>
+        </div>
+    </form>
+
+    <!-- Tableau -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="g : ${groupes.content}">
+            <td th:text="${g.nom}"></td>
+            <td>
+
+                <button type="button"
+                        class="btn btn-info btn-sm view-btn"
+                        th:attr="data-id=${g.id}">
+                    Voir
+                </button>
+
+                <button type="button"
+                        class="btn btn-warning btn-sm edit-btn"
+                        th:attr="data-id=${g.id}">
+                    Modifier
+                </button>
+
+                <a class="btn btn-danger btn-sm"
+                   th:href="@{/admin/groupes/delete/{id}(id=${g.id})}">
+                    Supprimer
+                </a>
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination">
+
+            <li class="page-item"
+                th:classappend="${groupes.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/groupes(page=${groupes.number-1}, keyword=${keyword})}">
+                    Précédent
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, groupes.totalPages-1)}"
+                th:classappend="${i == groupes.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{/admin/groupes(page=${i}, keyword=${keyword})}">
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:classappend="${groupes.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/groupes(page=${groupes.number+1}, keyword=${keyword})}">
+                    Suivant
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+    <!-- MODAL EDIT -->
+    <div class="modal fade" id="editModal">
+        <div class="modal-dialog">
+            <form method="post"
+                  th:action="@{/admin/groupes/update}">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Modifier Groupe</h5>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden" name="id" id="gid">
+
+                        <!-- NOM DU GROUPE -->
+                        <div class="mb-3">
+                            <label>Nom du groupe</label>
+                            <input class="form-control"
+                                   name="nom"
+                                   id="gnom"
+                                   required>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-primary">Enregistrer</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VIEW -->
+    <div class="modal fade" id="viewModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5>Détails Groupe</h5>
+                </div>
+
+                <div class="modal-body">
+                    <p><strong>Nom :</strong>
+                        <span id="v_nom"></span>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    // EDIT
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.onclick = () => {
+            fetch("/admin/groupes/edit/" + btn.dataset.id)
+                .then(r => r.json())
+                .then(g => {
+                    gid.value = g.id;
+                    gnom.value = g.nom;
+                    new bootstrap.Modal(editModal).show();
+                });
+        };
+    });
+
+    // VIEW
+    document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.onclick = () => {
+            fetch("/admin/groupes/edit/" + btn.dataset.id)
+                .then(r => r.json())
+                .then(g => {
+                    v_nom.textContent = g.nom ?? "—";
+                    new bootstrap.Modal(viewModal).show();
+                });
+        };
+    });
+
+});
+</script>
+
+</body>
+</html>

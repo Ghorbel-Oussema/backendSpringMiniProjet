@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div>
+
+    <h2>Liste des salles</h2>
+
+    <a 
+            class="btn btn-primary mb-3"
+            th:href="@{/admin/salles/new}">
+        Ajouter une salle
+    </a>
+
+    <!-- Recherche -->
+    <form class="row mb-3" th:action="@{/admin/salles}" method="get">
+        <div class="col-md-4">
+            <input class="form-control"
+                   name="keyword"
+                   th:value="${keyword}"
+                   placeholder="Rechercher par nom...">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary">Rechercher</button>
+        </div>
+    </form>
+
+    <!-- Tableau -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Capacité</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="s : ${salles.content}">
+            <td th:text="${s.nom}"></td>
+            <td th:text="${s.capacite}"></td>
+            <td>
+                <button type="button"
+                        class="btn btn-info btn-sm view-btn"
+                        th:attr="data-id=${s.id}">
+                    Voir
+                </button>
+
+                <button type="button"
+                        class="btn btn-warning btn-sm edit-btn"
+                        th:attr="data-id=${s.id}">
+                    Modifier
+                </button>
+
+                <a class="btn btn-danger btn-sm"
+                   th:href="@{/admin/salles/delete/{id}(id=${s.id})}"
+                   onclick="return confirm('Supprimer ?')">
+                    Supprimer
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination">
+
+            <li class="page-item"
+                th:classappend="${salles.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/salles(page=${salles.number-1}, keyword=${keyword})}">
+                    Précédent
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, salles.totalPages-1)}"
+                th:classappend="${i == salles.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{/admin/salles(page=${i}, keyword=${keyword})}">
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:classappend="${salles.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/salles(page=${salles.number+1}, keyword=${keyword})}">
+                    Suivant
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+    <!-- MODAL EDIT (sert aussi pour CREATE) -->
+    <div class="modal fade" id="editModal">
+        <div class="modal-dialog">
+            <form method="post" th:action="@{/admin/salles/update}">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editTitle">Modifier Salle</h5>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="sid">
+
+                        <label>Nom</label>
+                        <input class="form-control mb-2"
+                               name="nom" id="snom"
+                               placeholder="Nom salle" required>
+
+                        <label>Capacité</label>
+                        <input class="form-control"
+                               type="number"
+                               name="capacite" id="scap"
+                               placeholder="Capacité" required>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-primary">Enregistrer</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VIEW -->
+    <div class="modal fade" id="viewModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5>Détails Salle</h5>
+                </div>
+
+                <div class="modal-body">
+                    <p><strong>Nom :</strong> <span id="v_nom"></span></p>
+                    <p><strong>Capacité :</strong> <span id="v_cap"></span></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- JS -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.onclick = () => {
+            fetch("/admin/salles/edit/" + btn.dataset.id)
+                .then(r => r.json())
+                .then(s => {
+                    editTitle.textContent = "Modifier Salle";
+                    sid.value = s.id;
+                    snom.value = s.nom;
+                    scap.value = s.capacite ?? 0;
+                    new bootstrap.Modal(editModal).show();
+                });
+        };
+    });
+
+    document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.onclick = () => {
+            fetch("/admin/salles/edit/" + btn.dataset.id)
+                .then(r => r.json())
+                .then(s => {
+                    v_nom.textContent = s.nom;
+                    v_cap.textContent = s.capacite;
+                    new bootstrap.Modal(viewModal).show();
+                });
+        };
+    });
+
+});
+
+function openCreateModal(){
+    editTitle.textContent = "Ajouter Salle";
+    sid.value = "";
+    snom.value = "";
+    scap.value = "";
+    new bootstrap.Modal(editModal).show();
+}
+</script>
+
+</body>
+</html>

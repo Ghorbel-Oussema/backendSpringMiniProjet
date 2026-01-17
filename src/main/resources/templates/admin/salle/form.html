@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div>
+    <h2>Nouvelle Salle</h2>
+
+    <form th:action="@{/admin/salles/update}" method="post">
+        <div class="mb-3">
+            <label>Nom</label>
+            <input class="form-control" name="nom" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Capacité</label>
+            <input class="form-control" type="number" name="capacite" required>
+        </div>
+
+        <button class="btn btn-success">Enregistrer</button>
+        <a class="btn btn-secondary" th:href="@{/admin/salles}">Retour</a>
+    </form>
+</div>
+
+</body>
+</html>

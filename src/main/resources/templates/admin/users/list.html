@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+<div>
+
+    <h2>Gestion des utilisateurs</h2>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+<tbody>
+<tr th:each="u : ${users.content}">
+    <td th:text="${u.email}"></td>
+    <td th:text="${u.role.name}"></td>
+    <td>
+        <span th:text="${u.enabled ? 'Actif' : 'En attente'}"
+              th:classappend="${u.enabled} ? 'text-success' : 'text-danger'">
+        </span>
+    </td>
+    <td>
+        <a class="btn btn-warning btn-sm"
+           th:href="@{/admin/users/toggle/{id}(id=${u.id}, page=${users.number}, size=${users.size})}">
+            Activer / Désactiver
+        </a>
+    </td>
+</tr>
+</tbody>
+
+
+    </table>
+    <!-- Pagination -->
+<nav>
+    <ul class="pagination">
+
+        <li class="page-item"
+            th:classappend="${users.first} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{/admin/users(page=${users.number-1}, size=${users.size})}">
+                Précédent
+            </a>
+        </li>
+
+        <li class="page-item"
+            th:each="i : ${#numbers.sequence(0, users.totalPages-1)}"
+            th:classappend="${i == users.number} ? 'active'">
+            <a class="page-link"
+               th:text="${i + 1}"
+               th:href="@{/admin/users(page=${i}, size=${users.size})}">
+            </a>
+        </li>
+
+        <li class="page-item"
+            th:classappend="${users.last} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{/admin/users(page=${users.number+1}, size=${users.size})}">
+                Suivant
+            </a>
+        </li>
+
+    </ul>
+</nav>
+    
+
+</div>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div th:with="content='admin/etudiants/list :: content'"></div>
+
+<div th:fragment="content">
+    <h2>Liste des étudiants</h2>
+<!--  
+    <a class="btn btn-primary mb-3" th:href="@{/admin/etudiants/new}">
+        Ajouter
+    </a>-->
+<form class="row mb-3">
+    <div class="col-md-4">
+        <input class="form-control"
+               name="keyword"
+               th:value="${keyword}"
+               placeholder="Rechercher...">
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary">Rechercher</button>
+    </div>
+</form>
+
+    <table class="table table-striped">
+        <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Groupe</th>
+            <th>Action</th>
+        </tr>
+       <tr th:each="e : ${etudiants.content}">
+    <td th:text="${e.matricule}"></td>
+    <td th:text="${e.nom}"></td>
+    <td th:text="${e.user.email}"></td>
+<td th:text="${e.groupe != null ? e.groupe.nom : &quot;Cet étudiant n'est pas affecté&quot;}"></td>
+
+
+    
+    <td>
+        <button class="btn btn-info btn-sm view-btn"
+        th:attr="data-matricule=${e.matricule}">
+    Voir
+</button>
+        <button class="btn btn-warning btn-sm edit-btn"
+        th:attr="data-matricule=${e.matricule}">
+    Modifier
+</button>
+
+        <a class="btn btn-danger btn-sm"
+           th:href="@{/admin/etudiants/delete/{m}(m=${e.matricule})}">
+            Supprimer
+        </a>
+    </td>
+</tr>
+
+    </table>
+<nav>
+    <ul class="pagination">
+
+        <!-- Précédent -->
+        <li class="page-item" th:classappend="${etudiants.first} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{/admin/etudiants(page=${etudiants.number-1}, keyword=${keyword})}">
+                Précédent
+            </a>
+        </li>
+
+        <!-- Numéros de pages -->
+        <li class="page-item"
+            th:each="i : ${#numbers.sequence(0, etudiants.totalPages-1)}"
+            th:classappend="${i == etudiants.number} ? 'active'">
+            <a class="page-link"
+               th:text="${i + 1}"
+               th:href="@{/admin/etudiants(page=${i}, keyword=${keyword})}">
+            </a>
+        </li>
+
+        <!-- Suivant -->
+        <li class="page-item" th:classappend="${etudiants.last} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{/admin/etudiants(page=${etudiants.number+1}, keyword=${keyword})}">
+                Suivant
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
+    
+</div>
+<div class="modal fade" id="viewModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Détails Étudiant</h5>
+            </div>
+
+            <div class="modal-body">
+                <p><strong>Matricule :</strong> <span id="v_matricule"></span></p>
+                <p><strong>Nom :</strong> <span id="v_nom"></span></p>
+                <p><strong>Prénom :</strong> <span id="v_prenom"></span></p>
+                <p><strong>Email :</strong> <span id="v_email"></span></p>
+                <p><strong>Date inscription :</strong> <span id="v_date"></span></p>
+                 <p><strong>groupe :</strong> <span id="v_groupe"></span></p>
+                
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    Fermer
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal">
+    <div class="modal-dialog">
+        <form method="post" th:action="@{/admin/etudiants/update}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Modifier Étudiant</h5>
+                </div>
+
+<div class="modal-body">
+
+    <!-- Matricule (hidden) -->
+    <input type="hidden" name="matricule" id="m">
+
+    <!-- Nom -->
+    <div class="mb-2">
+        <label class="form-label">Nom</label>
+        <input class="form-control"
+               name="nom"
+               id="nom">
+    </div>
+
+    <!-- Prénom -->
+    <div class="mb-2">
+        <label class="form-label">Prénom</label>
+        <input class="form-control"
+               name="prenom"
+               id="prenom">
+    </div>
+
+    <!-- Email -->
+    <div class="mb-2">
+        <label class="form-label">Email</label>
+        <input class="form-control"
+               name="email"
+               id="email">
+    </div>
+
+    <!-- Groupe -->
+    <div class="mb-2">
+        <label class="form-label">Groupe</label>
+        <select class="form-select"
+                name="groupeId"
+                id="groupe">
+            <option value="">-- Aucun groupe --</option>
+            <option th:each="g : ${groupes}"
+                    th:value="${g.id}"
+                    th:text="${g.nom}">
+            </option>
+        </select>
+    </div>
+
+</div>
+
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Enregistrer</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Bootstrap JS Bundle (avec Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* ===== EDIT ===== */
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const m = btn.dataset.matricule;
+
+            fetch('/admin/etudiants/edit/' + m)
+                .then(r => r.json())
+                .then(e => {
+                    document.getElementById('m').value = e.matricule;
+                    document.getElementById('nom').value = e.nom;
+                    document.getElementById('prenom').value = e.prenom ?? '';
+                    document.getElementById('email').value = e.user.email;
+                    document.getElementById('groupe').value =
+                        e.groupe ? e.groupe.id : '';
+
+                    new bootstrap.Modal(
+                        document.getElementById('editModal')
+                    ).show();
+                });
+        });
+    });
+
+    /* ===== VIEW ===== */
+    document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const m = btn.dataset.matricule;
+
+            fetch('/admin/etudiants/edit/' + m)
+                .then(r => r.json())
+                .then(e => {
+                    document.getElementById('v_matricule').textContent = e.matricule;
+                    document.getElementById('v_nom').textContent = e.nom;
+                    document.getElementById('v_prenom').textContent = e.prenom ?? '-';
+                    document.getElementById('v_email').textContent = e.user.email;
+                    document.getElementById('v_date').textContent = e.dateInscription ?? '-';
+                    document.getElementById('v_groupe').textContent =
+                        e.groupe ? e.groupe.nom : "Cet étudiant n'est pas affecté";
+
+                    new bootstrap.Modal(
+                        document.getElementById('viewModal')
+                    ).show();
+                });
+        });
+    });
+
+});
+</script>
+
+
+
+
+
+</body>
+</html>

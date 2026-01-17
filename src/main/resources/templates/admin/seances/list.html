@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div class="container">
+
+    <h2>Liste des séances</h2>
+
+    <a class="btn btn-primary mb-3"
+       th:href="@{/admin/seances/new}">
+        Ajouter une séance
+    </a>
+
+    <!-- TABLE -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Salle</th>
+            <th>Cours</th>
+            <th>Groupe</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="s : ${seances.content}">
+            <td th:text="${s.date}"></td>
+            <td th:text="${s.heureDebut}"></td>
+            <td th:text="${s.heureFin}"></td>
+            <td th:text="${s.salle != null ? s.salle.nom : '—'}"></td>
+            <td th:text="${s.cours != null ? s.cours.code : '—'}"></td>
+            <td th:text="${s.groupe != null ? s.groupe.nom : '—'}"></td>
+            <td>
+                <button class="btn btn-info btn-sm view-btn"
+                        th:attr="data-id=${s.id}">
+                    Voir
+                </button>
+
+                <button class="btn btn-warning btn-sm edit-btn"
+                        th:attr="data-id=${s.id}">
+                    Modifier
+                </button>
+
+                <a class="btn btn-danger btn-sm"
+                   th:href="@{/admin/seances/delete/{id}(id=${s.id})}">
+                    Supprimer
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- PAGINATION -->
+    <nav>
+        <ul class="pagination">
+
+            <li class="page-item"
+                th:classappend="${seances.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/seances(page=${seances.number-1})}">
+                    Précédent
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, seances.totalPages-1)}"
+                th:classappend="${i == seances.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{/admin/seances(page=${i})}">
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:classappend="${seances.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/seances(page=${seances.number+1})}">
+                    Suivant
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+</div>
+
+<!-- ================= MODAL EDIT ================= -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" th:action="@{/admin/seances/update}">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier Séance</h5>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="sid">
+
+                    <input type="date" class="form-control mb-2"
+                           name="date" id="sdate">
+
+                    <input type="time" class="form-control mb-2"
+                           name="heureDebut" id="sdebut">
+
+                    <input type="time" class="form-control mb-2"
+                           name="heureFin" id="sfin">
+
+                    <select class="form-control mb-2" name="salle.id" id="ssalle">
+                        <option value="">-- Choisir une salle --</option>
+                        <option th:each="sl : ${salles}"
+                                th:value="${sl.id}"
+                                th:text="${sl.nom}">
+                        </option>
+                    </select>
+
+                    <select class="form-control mb-2" name="cours.code" id="scours">
+                        <option value="">-- Choisir un cours --</option>
+                        <option th:each="c : ${cours}"
+                                th:value="${c.code}"
+                                th:text="${c.code}">
+                        </option>
+                    </select>
+
+                    <!-- ✅ NOUVEAU : GROUPE -->
+                    <select class="form-control" name="groupe.id" id="sgroupe">
+                        <option value="">-- Choisir un groupe --</option>
+                        <option th:each="g : ${groupes}"
+                                th:value="${g.id}"
+                                th:text="${g.nom}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Enregistrer</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= MODAL VIEW ================= -->
+<div class="modal fade" id="viewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Détails Séance</h5>
+            </div>
+
+            <div class="modal-body">
+                <p><b>Date :</b> <span id="v_date"></span></p>
+                <p><b>Début :</b> <span id="v_debut"></span></p>
+                <p><b>Fin :</b> <span id="v_fin"></span></p>
+                <p><b>Salle :</b> <span id="v_salle"></span></p>
+                <p><b>Cours :</b> <span id="v_cours"></span></p>
+                <p><b>Groupe :</b> <span id="v_groupe"></span></p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= JS ================= -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    // EDIT
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.onclick = () => {
+            fetch("/admin/seances/edit/" + btn.dataset.id)
+                .then(r => r.json())
+                .then(s => {
+                    sid.value = s.id;
+                    sdate.value = s.date ?? "";
+                    sdebut.value = s.heureDebut ?? "";
+                    sfin.value = s.heureFin ?? "";
+                    ssalle.value = s.salle ? s.salle.id : "";
+                    scours.value = s.cours ? s.cours.code : "";
+                    sgroupe.value = s.groupe ? s.groupe.id : "";
+
+                    new bootstrap.Modal(editModal).show();
+                });
+        };
+    });
+
+    // VIEW
+    document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.onclick = () => {
+            fetch("/admin/seances/edit/" + btn.dataset.id)
+                .then(r => r.json())
+                .then(s => {
+                    v_date.textContent = s.date ?? "—";
+                    v_debut.textContent = s.heureDebut ?? "—";
+                    v_fin.textContent = s.heureFin ?? "—";
+                    v_salle.textContent = s.salle ? s.salle.nom : "—";
+                    v_cours.textContent = s.cours ? s.cours.code : "—";
+                    v_groupe.textContent = s.groupe ? s.groupe.nom : "—";
+
+                    new bootstrap.Modal(viewModal).show();
+                });
+        };
+    });
+
+});
+</script>
+
+</body>
+</html>

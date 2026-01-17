@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div th:with="content='admin/inscriptions/form :: content'"></div>
+
+<div th:fragment="content">
+    <h2>Inscrire un étudiant</h2>
+
+    <form th:action="@{/admin/inscriptions}" method="post">
+
+        <div class="mb-3">
+            <label>Étudiant</label>
+            <select name="matricule" class="form-select">
+                <option th:each="e : ${etudiants}"
+                        th:value="${e.matricule}"
+                        th:text="${e.nom}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Cours</label>
+            <select name="codeCours" class="form-select">
+                <option th:each="c : ${cours}"
+                        th:value="${c.code}"
+                        th:text="${c.titre}">
+                </option>
+            </select>
+        </div>
+
+        <button class="btn btn-success">Inscrire</button>
+    </form>
+</div>
+
+</body>
+</html>

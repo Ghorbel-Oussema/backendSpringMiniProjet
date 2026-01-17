@@ -1,0 +1,33 @@
+<div th:fragment="sidebar"
+     class="bg-dark text-white p-3"
+     style="width:250px; min-height:100vh;">
+
+    <h4>ADMIN</h4>
+    <hr>
+
+    <a class="d-block text-white mb-2" th:href="@{/admin}">Dashboard</a>
+
+    <hr>
+    <a class="d-block text-white mb-2" th:href="@{/admin/etudiants}">Étudiants</a>
+    <a class="d-block text-white mb-2" th:href="@{/admin/formateurs}">Formateurs</a>
+    <a class="d-block text-white mb-2" th:href="@{/admin/users}">Utilisateurs</a>
+
+    <hr>
+    <a class="d-block text-white mb-2" th:href="@{/admin/cours}">Cours</a>
+    <a class="d-block text-white mb-2" th:href="@{/admin/specialites}">Spécialités</a>
+    <a class="d-block text-white mb-2" th:href="@{/admin/groupes}">Groupes</a>
+
+    <hr>
+    <a class="d-block text-white mb-2" th:href="@{/admin/seances}">Séances</a>
+        <a class="d-block text-white mb-2" th:href="@{/admin/salles}">Salles</a>
+    
+    <a class="d-block text-white mb-2" th:href="@{/admin/notes}">Notes</a>
+
+    <hr>
+    <form th:action="@{/logout}" method="post">
+    <button class="btn btn-danger w-100 mt-3">
+        Déconnexion
+    </button>
+</form>
+
+</div>

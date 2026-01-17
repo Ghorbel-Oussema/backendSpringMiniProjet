@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div class="container">
+
+    <h2>Ajouter une séance</h2>
+
+    <form th:action="@{/admin/seances/save}" method="post">
+
+        <div class="mb-3">
+            <label>Date</label>
+            <input type="date" class="form-control"
+                   name="date" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Heure début</label>
+            <input type="time" class="form-control"
+                   name="heureDebut" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Heure fin</label>
+            <input type="time" class="form-control"
+                   name="heureFin" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Salle</label>
+            <select class="form-control" name="salle.id" required>
+                <option value="">-- Choisir une salle --</option>
+                <option th:each="sl : ${salles}"
+                        th:value="${sl.id}"
+                        th:text="${sl.nom}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Cours</label>
+            <select class="form-control" name="cours.code">
+                <option value="">-- Choisir un cours --</option>
+                <option th:each="c : ${cours}"
+                        th:value="${c.code}"
+                        th:text="${c.code}">
+                </option>
+            </select>
+        </div>
+
+        <!-- ✅ NOUVEAU : GROUPE -->
+        <div class="mb-3">
+            <label>Groupe</label>
+            <select class="form-control" name="groupe.id" required>
+                <option value="">-- Choisir un groupe --</option>
+                <option th:each="g : ${groupes}"
+                        th:value="${g.id}"
+                        th:text="${g.nom}">
+                </option>
+            </select>
+        </div>
+
+        <button class="btn btn-success">Enregistrer</button>
+        <a th:href="@{/admin/seances}" class="btn btn-secondary">
+            Annuler
+        </a>
+
+    </form>
+
+</div>
+
+</body>
+</html>

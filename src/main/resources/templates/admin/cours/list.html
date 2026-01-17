@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+<div>
+
+<h2>Liste des cours</h2>
+
+<a class="btn btn-primary mb-3" th:href="@{/admin/cours/new}">
+    Ajouter un cours
+</a>
+
+<!-- Recherche -->
+<form class="row mb-3">
+    <div class="col-md-4">
+        <input class="form-control"
+               name="keyword"
+               th:value="${keyword}"
+               placeholder="Rechercher par titre...">
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary">Rechercher</button>
+    </div>
+</form>
+
+<!-- Tableau -->
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Code</th>
+        <th>Titre</th>
+        <th>Formateur</th>
+        <th>Spécialité</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="c : ${cours.content}">
+        <td th:text="${c.code}"></td>
+        <td th:text="${c.titre}"></td>
+
+        <td th:text="${c.formateur != null ? c.formateur.nom : '-'}"></td>
+
+        <td th:text="${c.formateur != null && c.formateur.specialite != null
+            ? c.formateur.specialite.nom : '-'}"></td>
+
+        <td>
+            <button class="btn btn-info btn-sm view-btn"
+                    th:attr="data-code=${c.code}">
+                Voir
+            </button>
+
+            <button class="btn btn-warning btn-sm edit-btn"
+                    th:attr="data-code=${c.code}">
+                Modifier
+            </button>
+
+            <a class="btn btn-danger btn-sm"
+               th:href="@{/admin/cours/delete/{c}(c=${c.code})}">
+                Supprimer
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<nav>
+<ul class="pagination">
+
+    <li class="page-item"
+        th:classappend="${cours.first} ? 'disabled'">
+        <a class="page-link"
+           th:href="@{/admin/cours(page=${cours.number-1}, keyword=${keyword})}">
+            Précédent
+        </a>
+    </li>
+
+    <li class="page-item"
+        th:each="i : ${#numbers.sequence(0, cours.totalPages-1)}"
+        th:classappend="${i == cours.number} ? 'active'">
+        <a class="page-link"
+           th:text="${i+1}"
+           th:href="@{/admin/cours(page=${i}, keyword=${keyword})}">
+        </a>
+    </li>
+
+    <li class="page-item"
+        th:classappend="${cours.last} ? 'disabled'">
+        <a class="page-link"
+           th:href="@{/admin/cours(page=${cours.number+1}, keyword=${keyword})}">
+            Suivant
+        </a>
+    </li>
+
+</ul>
+</nav>
+
+<!-- ================= MODAL EDIT ================= -->
+<div class="modal fade" id="editModal">
+  <div class="modal-dialog">
+    <form method="post" th:action="@{/admin/cours/update}">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Modifier le cours</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- CODE (HIDDEN) -->
+          <input type="hidden" name="code" id="c_code">
+
+          <!-- TITRE -->
+          <div class="mb-3">
+            <label for="c_titre" class="form-label">Titre du cours</label>
+            <input type="text"
+                   class="form-control"
+                   name="titre"
+                   id="c_titre"
+                   placeholder="Titre du cours">
+          </div>
+
+          <!-- DESCRIPTION -->
+          <div class="mb-3">
+            <label for="c_desc" class="form-label">Description</label>
+            <textarea class="form-control"
+                      name="description"
+                      id="c_desc"
+                      placeholder="Description du cours"></textarea>
+          </div>
+
+          <!-- FORMATEUR -->
+          <div class="mb-3">
+            <label for="c_formateur" class="form-label">Formateur</label>
+            <select class="form-select"
+                    name="formateur.id"
+                    id="c_formateur">
+              <option value="">-- Choisir un formateur --</option>
+              <option th:each="f : ${formateurs}"
+                      th:value="${f.id}"
+                      th:text="${f.nom + ' (' + (f.specialite != null ? f.specialite.nom : 'Sans spécialité') + ')'}">
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary">
+            Enregistrer
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+
+</div>
+
+<!-- ================= MODAL VIEW ================= -->
+<div class="modal fade" id="viewModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Détails du cours</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <p>
+          <strong>Code :</strong>
+          <span id="v_code"></span>
+        </p>
+
+        <p>
+          <strong>Titre :</strong>
+          <span id="v_titre"></span>
+        </p>
+
+        <p>
+          <strong>Description :</strong><br>
+          <span id="v_desc"></span>
+        </p>
+
+        <p>
+          <strong>Formateur :</strong>
+          <span id="v_formateur"></span>
+        </p>
+
+        <p>
+          <strong>Spécialité :</strong>
+          <span id="v_specialite"></span>
+        </p>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Fermer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= JS ================= -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+document.querySelectorAll(".edit-btn").forEach(btn => {
+    btn.onclick = () => {
+        fetch("/admin/cours/edit/" + btn.dataset.code)
+            .then(r => r.json())
+            .then(c => {
+                c_code.value = c.code;
+                c_titre.value = c.titre;
+                c_desc.value = c.description ?? '';
+
+                if (c.formateur) {
+                    c_formateur.value = c.formateur.id;
+                }
+
+                new bootstrap.Modal(editModal).show();
+            });
+    };
+});
+
+document.querySelectorAll(".view-btn").forEach(btn => {
+	  btn.onclick = () => {
+	    fetch("/admin/cours/edit/" + btn.dataset.code)
+	      .then(r => r.json())
+	      .then(c => {
+
+	        document.getElementById("v_code").textContent = c.code;
+	        document.getElementById("v_titre").textContent = c.titre;
+	        document.getElementById("v_desc").textContent =
+	          c.description ?? "-";
+
+	        document.getElementById("v_formateur").textContent =
+	          c.formateur ? c.formateur.nom : "-";
+
+	        document.getElementById("v_specialite").textContent =
+	          (c.formateur && c.formateur.specialite)
+	            ? c.formateur.specialite.nom
+	            : "-";
+
+	        new bootstrap.Modal(
+	          document.getElementById("viewModal")
+	        ).show();
+	      });
+	  };
+	});
+
+});
+</script>
+
+</body>
+</html>

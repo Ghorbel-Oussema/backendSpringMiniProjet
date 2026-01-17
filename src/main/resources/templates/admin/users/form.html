@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div class="container">
+
+    <h2>Attribuer une note</h2>
+
+    <form th:action="@{/admin/notes/save}" method="post">
+
+        <!-- Valeur -->
+        <div class="mb-3">
+            <label>Note</label>
+            <input type="number" step="0.01"
+                   class="form-control"
+                   name="valeur" required>
+        </div>
+
+        <!-- Etudiant -->
+        <div class="mb-3">
+            <label>Étudiant</label>
+            <select class="form-control"
+                    name="etudiant.matricule" required>
+                <option th:each="e : ${etudiants}"
+                        th:value="${e.matricule}"
+                        th:text="${e.nom}">
+                </option>
+            </select>
+        </div>
+
+        <!-- Cours -->
+        <div class="mb-3">
+            <label>Cours</label>
+            <select class="form-control"
+                    name="cours.code" required>
+                <option th:each="c : ${cours}"
+                        th:value="${c.code}"
+                        th:text="${c.titre}">
+                </option>
+            </select>
+        </div>
+
+        <button class="btn btn-success">Enregistrer</button>
+        <a th:href="@{/admin/notes}" class="btn btn-secondary">Annuler</a>
+
+    </form>
+
+</div>
+
+</body>
+</html>

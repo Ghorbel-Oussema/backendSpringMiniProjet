@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout (~{::body})">
+<body>
+
+<div th:fragment="content">
+    <h2>Nouveau Groupe</h2>
+
+    <form th:action="@{/admin/groupes/update}" method="post">
+        <div class="mb-3">
+            <label>Nom</label>
+            <input class="form-control" name="nom" required>
+        </div>
+
+        <button class="btn btn-success">Enregistrer</button>
+    </form>
+</div>
+
+</body>
+</html>
