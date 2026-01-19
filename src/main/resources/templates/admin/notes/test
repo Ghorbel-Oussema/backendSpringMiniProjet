@@ -1,62 +1,9 @@
-Fonctionnalité	Statut
-Sécurité Spring Security	❌ (non bloquant)
-Statistiques	❌ (bonus)
-PDF	❌ (bonus)
-Notifications	❌ (optionnel)
-API REST	❌ (CSR, pas SSR)
-
-seance fih ama salle et ama cours( ely bech y9ari fih foramteur (ely 3andou specilatie )) w ama groupe (ely fih lista te3 etudent(ely teba3 ama groupe))
-
-donnc effacer le formateur id dans groupe 
-et ajouter groupe id dans seance 
-
-A) Mon profil
-
-Voir mon profil (nom, email, spécialité)
-
-Modifier mon profil (nom, spécialité si tu autorises)
-
-B) Mes cours
-
-Liste des cours du formateur
-
-Détails d’un cours : description + spécialité du formateur + (optionnel) groupes concernés via séances
-
-Voir les séances liées à un cours
-
-C) Mon planning (calendrier)
-
-Voir planning (toutes les séances de ses cours) filtré par date (from/to)
-
-Filtre par cours / salle / groupe
-
-Télécharger planning PDF (plus tard, comme étudiant)
-
-D) Gestion des notes (cœur du formateur)
-
-Choisir un cours → voir groupes concernés
-
-Choisir groupe + cours → liste des étudiants du groupe
-
-Saisir / modifier les notes (par étudiant) pour un cours
-
-Voir notes déjà saisies (pré-remplissage)
-
-Option : saisir notes “par séance” (si tu veux une évaluation par séance)
-
-E) Statistiques rapides (optionnel mais cool)
-
-Moyenne par groupe pour un cours
-
-Moyenne par cours
-
-Étudiants en difficulté (<10 par ex)
-
-Export notes (CSV/PDF) (plus tard)
 package com.example.MiniProjetBackend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -65,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -87,68 +35,71 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 🔑 pour AuthController (login REST)
     @Bean
-    AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(false); // JWT Bearer => OK
         config.addAllowedOrigin("http://localhost:4200");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
 
-
+    // ==========================================================
+    // 1) API SECURITY (Angular + JWT)  ==> STATELESS
+    // ==========================================================
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
+    @Order(1)
+    SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
         http
-            // ✅ CORS (OBLIGATOIRE POUR ANGULAR)
-            .cors(cors -> {}) 
-
-            // ✅ CSRF OFF pour REST
+            .securityMatcher("/api/**")
+            .cors(cors -> {})
             .csrf(csrf -> csrf.disable())
-
-            // ✅ SESSION (SSR uniquement)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            )
-
-            // ✅ AUTH RULES
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-
-                .requestMatchers(
-                    "/login",
-                    "/register",
-                    "/css/**",
-                    "/js/**",
-                    "/api/auth/**"
-                ).permitAll()
-
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/**").authenticated()
-
                 .anyRequest().authenticated()
             )
+        // ✅ IMPORTANT : pas de redirect /login, mais 401/403
+        .exceptionHandling(ex -> ex
+            .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // 401
+            .accessDeniedHandler((req, res, e) -> res.setStatus(HttpStatus.FORBIDDEN.value())) // 403
+        );
 
-            // ✅ FORM LOGIN (SSR)
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    // ==========================================================
+    // 2) WEB SECURITY (SSR Thymeleaf) ==> SESSION + formLogin
+    // (Si tu ne veux plus SSR, supprime ce bloc)
+    // ==========================================================
+    @Bean
+    @Order(2)
+    SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
+        http
+            .cors(cors -> {})
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/css/**", "/js/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
             .formLogin(form -> form
                 .loginPage("/login")
                 .defaultSuccessUrl("/admin", true)
                 .permitAll()
             )
-
-            // ✅ LOGOUT SSR
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
@@ -156,11 +107,6 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID")
             );
 
-        // ✅ JWT FILTER
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
-
 }
-

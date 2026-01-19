@@ -67,6 +67,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/etudiant/**").hasRole("ETUDIANT")
+                .requestMatchers("/api/formateur/**").hasRole("FORMATEUR")
                 .anyRequest().authenticated()
             )
         // ✅ IMPORTANT : pas de redirect /login, mais 401/403
