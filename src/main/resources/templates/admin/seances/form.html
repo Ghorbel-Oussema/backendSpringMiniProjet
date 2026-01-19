@@ -1,74 +1,163 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="admin/layout :: layout (~{::body})">
-<body>
+      th:replace="~{admin/layout :: layout(~{::content})}">
 
-<div class="container">
+<div th:fragment="content" class="container py-5">
 
-    <h2>Ajouter une séance</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-7">
 
-    <form th:action="@{/admin/seances/save}" method="post">
+            <!-- HEADER : Bouton retour, Titre et sous-titre -->
+            <div class="d-flex align-items-center mb-4">
+                <a th:href="@{/admin/seances}" class="btn btn-light rounded-circle me-3 shadow-sm text-primary">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="fw-bold text-dark m-0">Planifier une séance</h2>
+                    <p class="text-muted mb-0">Définissez le créneau horaire, la salle et le groupe concerné.</p>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label>Date</label>
-            <input type="date" class="form-control"
-                   name="date" required>
+            <!-- CARTE DU FORMULAIRE -->
+            <div class="card border-0 shadow-sm p-4 px-lg-5" style="border-radius: 20px;">
+                <form th:action="@{/admin/seances/save}" method="post">
+
+                    <!-- LIGNE 1 : DATE -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark text-uppercase ps-1">Date de la séance</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-3 px-3">
+                                <i class="bi bi-calendar-event text-primary"></i>
+                            </span>
+                            <input type="date" class="form-control bg-light border-start-0 py-2 rounded-end-3"
+                                   name="date" required>
+                        </div>
+                    </div>
+
+                    <!-- LIGNE 2 : HEURES (Côte à côte) -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label small fw-bold text-dark text-uppercase ps-1">Heure de début</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 rounded-start-3 px-3">
+                                    <i class="bi bi-clock text-primary"></i>
+                                </span>
+                                <input type="time" class="form-control bg-light border-start-0 py-2 rounded-end-3"
+                                       name="heureDebut" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark text-uppercase ps-1">Heure de fin</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 rounded-start-3 px-3">
+                                    <i class="bi bi-clock-fill text-primary"></i>
+                                </span>
+                                <input type="time" class="form-control bg-light border-start-0 py-2 rounded-end-3"
+                                       name="heureFin" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 opacity-25">
+
+                    <!-- LIGNE 3 : SALLE -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark text-uppercase ps-1">Salle de classe</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-3 px-3">
+                                <i class="bi bi-door-open text-primary"></i>
+                            </span>
+                            <select class="form-select bg-light border-start-0 py-2 rounded-end-3" name="salle.id" required>
+                                <option value="" disabled selected>-- Choisir une salle --</option>
+                                <option th:each="sl : ${salles}"
+                                        th:value="${sl.id}"
+                                        th:text="${sl.nom}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- LIGNE 4 : COURS -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark text-uppercase ps-1">Matière / Cours</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-3 px-3">
+                                <i class="bi bi-book text-primary"></i>
+                            </span>
+                            <select class="form-select bg-light border-start-0 py-2 rounded-end-3" name="cours.code" required>
+                                <option value="" disabled selected>-- Choisir un cours --</option>
+                                <option th:each="c : ${cours}"
+                                        th:value="${c.code}"
+                                        th:text="${c.code}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- LIGNE 5 : GROUPE -->
+                    <div class="mb-5">
+                        <label class="form-label small fw-bold text-dark text-uppercase ps-1">Groupe d'étudiants</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-3 px-3">
+                                <i class="bi bi-people text-primary"></i>
+                            </span>
+                            <select class="form-select bg-light border-start-0 py-2 rounded-end-3" name="groupe.id" required>
+                                <option value="" disabled selected>-- Choisir un groupe --</option>
+                                <option th:each="g : ${groupes}"
+                                        th:value="${g.id}"
+                                        th:text="${g.nom}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm py-2">
+                            <i class="bi bi-calendar-check me-2"></i> Enregistrer la séance
+                        </button>
+                        <a th:href="@{/admin/seances}" class="btn btn-link text-muted text-decoration-none small mt-2 text-center">
+                            Annuler et revenir au planning
+                        </a>
+                    </div>
+
+                </form>
+            </div>
         </div>
+    </div>
 
-        <div class="mb-3">
-            <label>Heure début</label>
-            <input type="time" class="form-control"
-                   name="heureDebut" required>
-        </div>
+    <!-- STYLE CSS INTERNE -->
+    <style>
+        .form-control:focus, .form-select:focus {
+            background-color: #fff !important;
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+        }
 
-        <div class="mb-3">
-            <label>Heure fin</label>
-            <input type="time" class="form-control"
-                   name="heureFin" required>
-        </div>
+        .input-group-text {
+            color: #6c757d;
+        }
 
-        <div class="mb-3">
-            <label>Salle</label>
-            <select class="form-control" name="salle.id" required>
-                <option value="">-- Choisir une salle --</option>
-                <option th:each="sl : ${salles}"
-                        th:value="${sl.id}"
-                        th:text="${sl.nom}">
-                </option>
-            </select>
-        </div>
+        .btn-primary {
+            transition: all 0.3s ease;
+            background-color: #0d6efd;
+            border: none;
+        }
 
-        <div class="mb-3">
-            <label>Cours</label>
-            <select class="form-control" name="cours.code">
-                <option value="">-- Choisir un cours --</option>
-                <option th:each="c : ${cours}"
-                        th:value="${c.code}"
-                        th:text="${c.code}">
-                </option>
-            </select>
-        </div>
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            background-color: #0b5ed7;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3) !important;
+        }
 
-        <!-- ✅ NOUVEAU : GROUPE -->
-        <div class="mb-3">
-            <label>Groupe</label>
-            <select class="form-control" name="groupe.id" required>
-                <option value="">-- Choisir un groupe --</option>
-                <option th:each="g : ${groupes}"
-                        th:value="${g.id}"
-                        th:text="${g.nom}">
-                </option>
-            </select>
-        </div>
+        /* Arrondis personnalisés pour l'input group */
+        .rounded-start-3 { border-radius: 12px 0 0 12px !important; }
+        .rounded-end-3 { border-radius: 0 12px 12px 0 !important; }
 
-        <button class="btn btn-success">Enregistrer</button>
-        <a th:href="@{/admin/seances}" class="btn btn-secondary">
-            Annuler
-        </a>
-
-    </form>
+        input[type="date"], input[type="time"] {
+            cursor: pointer;
+        }
+    </style>
 
 </div>
-
-</body>
 </html>

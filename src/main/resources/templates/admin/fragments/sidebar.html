@@ -1,33 +1,145 @@
 <div th:fragment="sidebar"
-     class="bg-dark text-white p-3"
+     class="admin-sidebar bg-dark text-white p-3 shadow"
      style="width:250px; min-height:100vh;">
 
-    <h4>ADMIN</h4>
-    <hr>
+    <!-- Titre avec style Indigo Enterprise -->
+    <h4 class="sidebar-brand text-center fw-bold py-3 m-0">ACADEMIA</h4>
+    <hr class="sidebar-divider">
 
-    <a class="d-block text-white mb-2" th:href="@{/admin}">Dashboard</a>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin}">Dashboard</a>
 
-    <hr>
-    <a class="d-block text-white mb-2" th:href="@{/admin/etudiants}">Étudiants</a>
-    <a class="d-block text-white mb-2" th:href="@{/admin/formateurs}">Formateurs</a>
-    <a class="d-block text-white mb-2" th:href="@{/admin/users}">Utilisateurs</a>
+    <hr class="sidebar-divider">
+    <div class="sidebar-heading">Utilisateurs</div>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/etudiants}">Étudiants</a>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/formateurs}">Formateurs</a>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/users}">Utilisateurs</a>
 
-    <hr>
-    <a class="d-block text-white mb-2" th:href="@{/admin/cours}">Cours</a>
-    <a class="d-block text-white mb-2" th:href="@{/admin/specialites}">Spécialités</a>
-    <a class="d-block text-white mb-2" th:href="@{/admin/groupes}">Groupes</a>
+    <hr class="sidebar-divider">
+    <div class="sidebar-heading">Enseignement</div>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/cours}">Cours</a>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/specialites}">Spécialités</a>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/groupes}">Groupes</a>
 
-    <hr>
-    <a class="d-block text-white mb-2" th:href="@{/admin/seances}">Séances</a>
-        <a class="d-block text-white mb-2" th:href="@{/admin/salles}">Salles</a>
-    
-    <a class="d-block text-white mb-2" th:href="@{/admin/notes}">Notes</a>
+    <hr class="sidebar-divider">
+    <div class="sidebar-heading">Planning</div>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/seances}">Séances</a>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/salles}">Salles</a>
 
-    <hr>
+    <a class="sidebar-link d-block text-white mb-2" th:href="@{/admin/notes}">Notes</a>
+
+    <hr class="sidebar-divider">
     <form th:action="@{/logout}" method="post">
-    <button class="btn btn-danger w-100 mt-3">
-        Déconnexion
-    </button>
-</form>
+        <button class="btn btn-logout w-100 mt-3 fw-bold">
+            <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
+        </button>
+    </form>
 
+    <style>
+        /* Palette Indigo Enterprise */
+        :root {
+            --sidebar-navy: #1a202c; /* Bleu très sombre pro */
+            --indigo-accent: #4e73df; /* Le bleu Indigo de votre Dashboard */
+            --sidebar-text-muted: rgba(255, 255, 255, 0.5);
+        }
+
+        .admin-sidebar {
+            background-color: var(--sidebar-navy) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        .sidebar-brand {
+            letter-spacing: 2px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        /* Petit trait sous le titre pour le style */
+        .sidebar-brand::after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 3px;
+            background: var(--indigo-accent);
+            margin: 8px auto 0;
+            border-radius: 2px;
+        }
+
+        .sidebar-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            margin: 0.75rem 0;
+            opacity: 1;
+        }
+
+        /* Titres de sections (Headings) */
+        .sidebar-heading {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--sidebar-text-muted);
+            padding: 0.5rem 1rem;
+            letter-spacing: 1px;
+        }
+
+        /* Liens de navigation */
+        .sidebar-link {
+            text-decoration: none !important;
+            padding: 12px 16px;
+            border-radius: 6px;
+            transition: all 0.25s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8) !important;
+            margin: 2px 0;
+        }
+
+        /* Hover : Style Indigo */
+        .sidebar-link:hover {
+            background-color: rgba(78, 115, 223, 0.15); /* Indigo très léger */
+            color: var(--indigo-accent) !important;
+            padding-left: 22px; /* Décalage fluide */
+        }
+
+        /* Style spécifique pour le lien actif (si vous ajoutez la classe .active via Thymeleaf plus tard) */
+        .sidebar-link.active {
+            background-color: var(--indigo-accent) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Remplacement du point par un tiret vertical indigo au survol */
+        .sidebar-link::before {
+            content: '';
+            width: 3px;
+            height: 0;
+            background-color: var(--indigo-accent);
+            position: absolute;
+            left: 0;
+            transition: height 0.3s ease;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-link:hover::before {
+            height: 20px;
+        }
+
+        /* Bouton Déconnexion assorti au style Enterprise */
+        .btn-logout {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #ee5d6c;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            transition: 0.3s;
+            padding: 10px;
+        }
+
+        .btn-logout:hover {
+            background-color: #dc3545;
+            color: white;
+            border-color: #dc3545;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+        }
+    </style>
 </div>

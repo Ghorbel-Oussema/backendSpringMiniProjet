@@ -1,194 +1,224 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="admin/layout :: layout (~{::body})">
-<body>
+      th:replace="~{admin/layout :: layout(~{::content})}">
 
-<div>
+<div th:fragment="content" class="container-fluid py-4">
 
-    <h2>Liste des salles</h2>
-
-    <a 
-            class="btn btn-primary mb-3"
-            th:href="@{/admin/salles/new}">
-        Ajouter une salle
-    </a>
-
-    <!-- Recherche -->
-    <form class="row mb-3" th:action="@{/admin/salles}" method="get">
-        <div class="col-md-4">
-            <input class="form-control"
-                   name="keyword"
-                   th:value="${keyword}"
-                   placeholder="Rechercher par nom...">
+    <!-- HEADER & TITRE -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark m-0">Gestion des Salles</h2>
+            <p class="text-muted">Gérez les locaux et leurs capacités d'accueil pour les séances.</p>
         </div>
-        <div class="col-md-2">
-            <button class="btn btn-primary">Rechercher</button>
-        </div>
-    </form>
+        <button class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="openCreateModal()">
+            <i class="bi bi-plus-lg me-2"></i>Ajouter une salle
+        </button>
+    </div>
 
-    <!-- Tableau -->
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Nom</th>
-            <th>Capacité</th>
-            <th>Action</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr th:each="s : ${salles.content}">
-            <td th:text="${s.nom}"></td>
-            <td th:text="${s.capacite}"></td>
-            <td>
-                <button type="button"
-                        class="btn btn-info btn-sm view-btn"
-                        th:attr="data-id=${s.id}">
-                    Voir
-                </button>
-
-                <button type="button"
-                        class="btn btn-warning btn-sm edit-btn"
-                        th:attr="data-id=${s.id}">
-                    Modifier
-                </button>
-
-                <a class="btn btn-danger btn-sm"
-                   th:href="@{/admin/salles/delete/{id}(id=${s.id})}"
-                   onclick="return confirm('Supprimer ?')">
-                    Supprimer
-                </a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <!-- Pagination -->
-    <nav>
-        <ul class="pagination">
-
-            <li class="page-item"
-                th:classappend="${salles.first} ? 'disabled'">
-                <a class="page-link"
-                   th:href="@{/admin/salles(page=${salles.number-1}, keyword=${keyword})}">
-                    Précédent
-                </a>
-            </li>
-
-            <li class="page-item"
-                th:each="i : ${#numbers.sequence(0, salles.totalPages-1)}"
-                th:classappend="${i == salles.number} ? 'active'">
-                <a class="page-link"
-                   th:text="${i + 1}"
-                   th:href="@{/admin/salles(page=${i}, keyword=${keyword})}">
-                </a>
-            </li>
-
-            <li class="page-item"
-                th:classappend="${salles.last} ? 'disabled'">
-                <a class="page-link"
-                   th:href="@{/admin/salles(page=${salles.number+1}, keyword=${keyword})}">
-                    Suivant
-                </a>
-            </li>
-
-        </ul>
-    </nav>
-
-    <!-- MODAL EDIT (sert aussi pour CREATE) -->
-    <div class="modal fade" id="editModal">
-        <div class="modal-dialog">
-            <form method="post" th:action="@{/admin/salles/update}">
-                <div class="modal-content">
-
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editTitle">Modifier Salle</h5>
+    <!-- BARRE DE RECHERCHE -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+        <div class="card-body p-3">
+            <form class="row g-2" th:action="@{/admin/salles}" method="get">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0" style="border-radius: 10px 0 0 10px;">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input class="form-control border-start-0 ps-0"
+                               style="border-radius: 0 10px 10px 0;"
+                               name="keyword"
+                               th:value="${keyword}"
+                               placeholder="Rechercher une salle par nom...">
                     </div>
-
-                    <div class="modal-body">
-                        <input type="hidden" name="id" id="sid">
-
-                        <label>Nom</label>
-                        <input class="form-control mb-2"
-                               name="nom" id="snom"
-                               placeholder="Nom salle" required>
-
-                        <label>Capacité</label>
-                        <input class="form-control"
-                               type="number"
-                               name="capacite" id="scap"
-                               placeholder="Capacité" required>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="btn btn-primary">Enregistrer</button>
-                    </div>
-
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-dark w-100 fw-bold" style="border-radius: 10px;">Rechercher</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- TABLEAU DANS UNE CARTE -->
+    <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Nom de la Salle</th>
+                        <th class="py-3 text-uppercase small fw-bold text-muted text-center">Capacité</th>
+                        <th class="py-3 text-uppercase small fw-bold text-muted text-end pe-4">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${salles.content}">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary">
+                                    <i class="bi bi-door-open-fill"></i>
+                                </div>
+                                <span class="fw-bold text-dark" th:text="${s.nom}"></span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                                <span class="badge rounded-pill bg-info bg-opacity-10 text-info px-3 py-2">
+                                    <i class="bi bi-people-fill me-1"></i>
+                                    <span th:text="${s.capacite}"></span> places
+                                </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group">
+                                <button class="btn btn-light btn-sm rounded-circle me-1 view-btn"
+                                        th:attr="data-id=${s.id}" title="Voir détails">
+                                    <i class="bi bi-eye text-primary"></i>
+                                </button>
+                                <button class="btn btn-light btn-sm rounded-circle me-1 edit-btn"
+                                        th:attr="data-id=${s.id}" title="Modifier">
+                                    <i class="bi bi-pencil-square text-warning"></i>
+                                </button>
+                                <a class="btn btn-light btn-sm rounded-circle"
+                                   th:href="@{/admin/salles/delete/{id}(id=${s.id})}"
+                                   onclick="return confirm('Supprimer cette salle ?')" title="Supprimer">
+                                    <i class="bi bi-trash text-danger"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="card-footer bg-white border-0 py-3" style="border-radius: 0 0 20px 20px;">
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center m-0">
+                    <li class="page-item" th:classappend="${salles.first} ? 'disabled'">
+                        <a class="page-link border-0 rounded-circle mx-1 shadow-sm" th:href="@{/admin/salles(page=${salles.number-1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, salles.totalPages-1)}" th:classappend="${i == salles.number} ? 'active'">
+                        <a class="page-link border-0 rounded-circle mx-1 shadow-sm" th:text="${i+1}" th:href="@{/admin/salles(page=${i}, keyword=${keyword})}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${salles.last} ? 'disabled'">
+                        <a class="page-link border-0 rounded-circle mx-1 shadow-sm" th:href="@{/admin/salles(page=${salles.number+1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
     <!-- MODAL VIEW -->
-    <div class="modal fade" id="viewModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5>Détails Salle</h5>
+    <div class="modal fade" id="viewModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="fw-bold"><i class="bi bi-info-circle me-2 text-primary"></i>Détails de la Salle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
-                <div class="modal-body">
-                    <p><strong>Nom :</strong> <span id="v_nom"></span></p>
-                    <p><strong>Capacité :</strong> <span id="v_cap"></span></p>
+                <div class="modal-body py-4 text-center">
+                    <div class="bg-primary bg-opacity-10 d-inline-block rounded-circle p-4 mb-3">
+                        <i class="bi bi-building text-primary fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1" id="v_nom"></h3>
+                    <div class="mt-3">
+                        <span class="badge bg-light text-dark border px-4 py-2 fs-6 rounded-pill">
+                            Capacité : <strong class="text-primary" id="v_cap"></strong> places
+                        </span>
+                    </div>
                 </div>
-
             </div>
         </div>
     </div>
 
+    <!-- MODAL EDIT / CREATE -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <form method="post" th:action="@{/admin/salles/update}" class="w-100">
+                <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="fw-bold"><i class="bi bi-pencil-square me-2 text-warning"></i><span id="editTitle">Modifier Salle</span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <input type="hidden" name="id" id="sid">
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Nom de la salle</label>
+                            <input class="form-control rounded-3 py-2" name="nom" id="snom" placeholder="Ex: Salle A102" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Capacité d'accueil</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light rounded-start-3"><i class="bi bi-people"></i></span>
+                                <input type="number" class="form-control rounded-end-3 py-2" name="capacite" id="scap" placeholder="Ex: 30" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Enregistrer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- STYLE CSS -->
+    <style>
+        .table-hover tbody tr:hover { background-color: #f8faff !important; transition: 0.3s; }
+        .page-link { color: #6c757d; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: none; }
+        .page-item.active .page-link { background-color: #0d6efd !important; color: white !important; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3); }
+        .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); border-color: #0d6efd; }
+        .btn-light:hover { background-color: #f0f0f0; }
+    </style>
+
+    <!-- JS -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const editModalEl = new bootstrap.Modal(document.getElementById('editModal'));
+            const viewModalEl = new bootstrap.Modal(document.getElementById('viewModal'));
+
+            // EDIT
+            document.querySelectorAll(".edit-btn").forEach(btn => {
+                btn.onclick = () => {
+                    fetch("/admin/salles/edit/" + btn.dataset.id)
+                        .then(r => r.json())
+                        .then(s => {
+                            document.getElementById('editTitle').textContent = "Modifier Salle";
+                            document.getElementById('sid').value = s.id;
+                            document.getElementById('snom').value = s.nom;
+                            document.getElementById('scap').value = s.capacite ?? 0;
+                            editModalEl.show();
+                        });
+                };
+            });
+
+            // VIEW
+            document.querySelectorAll(".view-btn").forEach(btn => {
+                btn.onclick = () => {
+                    fetch("/admin/salles/edit/" + btn.dataset.id)
+                        .then(r => r.json())
+                        .then(s => {
+                            document.getElementById('v_nom').textContent = s.nom;
+                            document.getElementById('v_cap').textContent = s.capacite;
+                            viewModalEl.show();
+                        });
+                };
+            });
+        });
+
+        function openCreateModal(){
+            document.getElementById('editTitle').textContent = "Ajouter Salle";
+            document.getElementById('sid').value = "";
+            document.getElementById('snom').value = "";
+            document.getElementById('scap').value = "";
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        }
+    </script>
 </div>
-
-<!-- JS -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    document.querySelectorAll(".edit-btn").forEach(btn => {
-        btn.onclick = () => {
-            fetch("/admin/salles/edit/" + btn.dataset.id)
-                .then(r => r.json())
-                .then(s => {
-                    editTitle.textContent = "Modifier Salle";
-                    sid.value = s.id;
-                    snom.value = s.nom;
-                    scap.value = s.capacite ?? 0;
-                    new bootstrap.Modal(editModal).show();
-                });
-        };
-    });
-
-    document.querySelectorAll(".view-btn").forEach(btn => {
-        btn.onclick = () => {
-            fetch("/admin/salles/edit/" + btn.dataset.id)
-                .then(r => r.json())
-                .then(s => {
-                    v_nom.textContent = s.nom;
-                    v_cap.textContent = s.capacite;
-                    new bootstrap.Modal(viewModal).show();
-                });
-        };
-    });
-
-});
-
-function openCreateModal(){
-    editTitle.textContent = "Ajouter Salle";
-    sid.value = "";
-    snom.value = "";
-    scap.value = "";
-    new bootstrap.Modal(editModal).show();
-}
-</script>
-
-</body>
 </html>

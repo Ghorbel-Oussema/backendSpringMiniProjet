@@ -1,26 +1,112 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="admin/layout :: layout (~{::body})">
-<body>
+      th:replace="~{admin/layout :: layout(~{::content})}">
 
-<div>
-    <h2>Nouvelle Salle</h2>
+<div th:fragment="content" class="container py-5">
 
-    <form th:action="@{/admin/salles/update}" method="post">
-        <div class="mb-3">
-            <label>Nom</label>
-            <input class="form-control" name="nom" required>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-5">
+
+            <!-- HEADER : Bouton retour, Titre et sous-titre -->
+            <div class="d-flex align-items-center mb-4">
+                <a th:href="@{/admin/salles}" class="btn btn-light rounded-circle me-3 shadow-sm text-primary">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="fw-bold text-dark m-0">Nouvelle Salle</h2>
+                    <p class="text-muted mb-0">Ajoutez un nouveau local pour les cours et examens.</p>
+                </div>
+            </div>
+
+            <!-- CARTE DU FORMULAIRE -->
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 20px;">
+                <form th:action="@{/admin/salles/update}" method="post">
+
+                    <!-- CHAMP : NOM DE LA SALLE -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark text-uppercase ps-1">Nom de la salle</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-3 px-3">
+                                <i class="bi bi-door-open-fill text-primary"></i>
+                            </span>
+                            <input class="form-control bg-light border-start-0 py-2 rounded-end-3"
+                                   name="nom"
+                                   placeholder="Ex: Salle A102 ou Amphi B"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- CHAMP : CAPACITÉ -->
+                    <div class="mb-5">
+                        <label class="form-label small fw-bold text-dark text-uppercase ps-1">Capacité d'accueil</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-3 px-3">
+                                <i class="bi bi-people-fill text-primary"></i>
+                            </span>
+                            <input type="number"
+                                   class="form-control bg-light border-start-0 border-end-0 py-2"
+                                   name="capacite"
+                                   placeholder="Ex: 30"
+                                   required>
+                            <span class="input-group-text bg-light border-start-0 rounded-end-3 text-muted small fw-bold px-3">
+                                places
+                            </span>
+                        </div>
+                        <div class="form-text small mt-2 ps-1 text-muted">
+                            Nombre maximum d'étudiants autorisés dans cette salle.
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm py-2">
+                            <i class="bi bi-check-circle me-2"></i> Enregistrer la salle
+                        </button>
+                        <a th:href="@{/admin/salles}" class="btn btn-link text-muted text-decoration-none small mt-2 text-center">
+                            Annuler et revenir à la liste
+                        </a>
+                    </div>
+
+                </form>
+            </div>
         </div>
+    </div>
 
-        <div class="mb-3">
-            <label>Capacité</label>
-            <input class="form-control" type="number" name="capacite" required>
-        </div>
+    <!-- STYLE CSS INTERNE -->
+    <style>
+        .form-control:focus {
+            background-color: #fff !important;
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+        }
 
-        <button class="btn btn-success">Enregistrer</button>
-        <a class="btn btn-secondary" th:href="@{/admin/salles}">Retour</a>
-    </form>
+        .input-group-text {
+            color: #6c757d;
+        }
+
+        .btn-primary {
+            transition: all 0.3s ease;
+            background-color: #0d6efd;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            background-color: #0b5ed7;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3) !important;
+        }
+
+        /* Arrondis personnalisés pour l'input group */
+        .rounded-start-3 { border-radius: 12px 0 0 12px !important; }
+        .rounded-end-3 { border-radius: 0 12px 12px 0 !important; }
+
+        /* Masquer les flèches du champ number */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+
 </div>
-
-</body>
 </html>

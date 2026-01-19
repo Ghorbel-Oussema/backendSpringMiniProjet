@@ -1,175 +1,196 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="admin/layout :: layout (~{::body})">
-<body>
+      th:replace="~{admin/layout :: layout(~{::content})}">
 
-<div>
+<div th:fragment="content" class="container-fluid py-4">
 
-    <h2>Liste des spécialités</h2>
-
-    <a class="btn btn-primary mb-3"
-       th:href="@{/admin/specialites/new}">
-        Ajouter une spécialité
-    </a>
-
-    <!-- Recherche -->
-    <form class="row mb-3">
-        <div class="col-md-4">
-            <input class="form-control"
-                   name="keyword"
-                   th:value="${keyword}"
-                   placeholder="Rechercher par nom...">
+    <!-- HEADER & TITRE -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark m-0">Gestion des Spécialités</h2>
+            <p class="text-muted">Définissez les domaines d'expertise et les filières d'enseignement.</p>
         </div>
-        <div class="col-md-2">
-            <button class="btn btn-primary">Rechercher</button>
-        </div>
-    </form>
+        <a class="btn btn-primary rounded-pill px-4 shadow-sm" th:href="@{/admin/specialites/new}">
+            <i class="bi bi-plus-lg me-2"></i>Nouvelle Spécialité
+        </a>
+    </div>
 
-    <!-- Tableau -->
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Nom</th>
-            <th>Action</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr th:each="s : ${specialites.content}">
-            <td th:text="${s.nom}"></td>
-            <td>
-
-                <button type="button"
-                        class="btn btn-info btn-sm view-btn"
-                        th:attr="data-id=${s.id}">
-                    Voir
-                </button>
-
-                <button type="button"
-                        class="btn btn-warning btn-sm edit-btn"
-                        th:attr="data-id=${s.id}">
-                    Modifier
-                </button>
-
-                <a class="btn btn-danger btn-sm"
-                   th:href="@{/admin/specialites/delete/{id}(id=${s.id})}">
-                    Supprimer
-                </a>
-
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <!-- Pagination -->
-    <nav>
-        <ul class="pagination">
-
-            <li class="page-item"
-                th:classappend="${specialites.first} ? 'disabled'">
-                <a class="page-link"
-                   th:href="@{/admin/specialites(page=${specialites.number-1}, keyword=${keyword})}">
-                    Précédent
-                </a>
-            </li>
-
-            <li class="page-item"
-                th:each="i : ${#numbers.sequence(0, specialites.totalPages-1)}"
-                th:classappend="${i == specialites.number} ? 'active'">
-                <a class="page-link"
-                   th:text="${i + 1}"
-                   th:href="@{/admin/specialites(page=${i}, keyword=${keyword})}">
-                </a>
-            </li>
-
-            <li class="page-item"
-                th:classappend="${specialites.last} ? 'disabled'">
-                <a class="page-link"
-                   th:href="@{/admin/specialites(page=${specialites.number+1}, keyword=${keyword})}">
-                    Suivant
-                </a>
-            </li>
-
-        </ul>
-    </nav>
-
-    <!-- MODAL EDIT -->
-    <div class="modal fade" id="editModal">
-        <div class="modal-dialog">
-            <form method="post"
-                  th:action="@{/admin/specialites/update}">
-                <div class="modal-content">
-
-                    <div class="modal-header">
-                        <h5 class="modal-title">Modifier Spécialité</h5>
+    <!-- BARRE DE RECHERCHE -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+        <div class="card-body p-3">
+            <form class="row g-2">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0" style="border-radius: 10px 0 0 10px;">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input class="form-control border-start-0 ps-0"
+                               style="border-radius: 0 10px 10px 0;"
+                               name="keyword"
+                               th:value="${keyword}"
+                               placeholder="Rechercher une spécialité par nom...">
                     </div>
-
-                    <div class="modal-body">
-                        <input type="hidden" name="id" id="sid">
-                        <input class="form-control"
-                               name="nom" id="snom"
-                               placeholder="Nom spécialité">
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="btn btn-primary">Enregistrer</button>
-                    </div>
-
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-dark w-100 fw-bold" style="border-radius: 10px;">Filtrer</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- TABLEAU DANS UNE CARTE -->
+    <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Nom de la Spécialité</th>
+                        <th class="py-3 text-uppercase small fw-bold text-muted text-end pe-4">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${specialites.content}">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary">
+                                    <i class="bi bi-tag-fill"></i>
+                                </div>
+                                <span class="fw-bold text-dark" th:text="${s.nom}"></span>
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group">
+                                <button class="btn btn-light btn-sm rounded-circle me-1 view-btn"
+                                        th:attr="data-id=${s.id}" title="Voir détails">
+                                    <i class="bi bi-eye text-primary"></i>
+                                </button>
+                                <button class="btn btn-light btn-sm rounded-circle me-1 edit-btn"
+                                        th:attr="data-id=${s.id}" title="Modifier">
+                                    <i class="bi bi-pencil-square text-warning"></i>
+                                </button>
+                                <a class="btn btn-light btn-sm rounded-circle"
+                                   th:href="@{/admin/specialites/delete/{id}(id=${s.id})}"
+                                   onclick="return confirm('Supprimer cette spécialité ?')" title="Supprimer">
+                                    <i class="bi bi-trash text-danger"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="card-footer bg-white border-0 py-3" style="border-radius: 0 0 20px 20px;">
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center m-0">
+                    <li class="page-item" th:classappend="${specialites.first} ? 'disabled'">
+                        <a class="page-link border-0 rounded-circle mx-1 shadow-sm" th:href="@{/admin/specialites(page=${specialites.number-1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, specialites.totalPages-1)}" th:classappend="${i == specialites.number} ? 'active'">
+                        <a class="page-link border-0 rounded-circle mx-1 shadow-sm" th:text="${i+1}" th:href="@{/admin/specialites(page=${i}, keyword=${keyword})}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${specialites.last} ? 'disabled'">
+                        <a class="page-link border-0 rounded-circle mx-1 shadow-sm" th:href="@{/admin/specialites(page=${specialites.number+1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
     <!-- MODAL VIEW -->
-    <div class="modal fade" id="viewModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5>Détails Spécialité</h5>
+    <div class="modal fade" id="viewModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="fw-bold"><i class="bi bi-info-circle me-2 text-primary"></i>Détails Spécialité</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
-                <div class="modal-body">
-                    <p><strong>Nom :</strong>
-                        <span id="v_nom"></span>
-                    </p>
+                <div class="modal-body py-4 text-center">
+                    <div class="bg-primary bg-opacity-10 d-inline-block rounded-circle p-4 mb-3">
+                        <i class="bi bi-tag text-primary fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1" id="v_nom"></h3>
+                    <p class="text-muted small">ID Spécialité : <span id="v_id_display" class="fw-medium"></span></p>
                 </div>
-
             </div>
         </div>
     </div>
 
+    <!-- MODAL EDIT -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <form method="post" th:action="@{/admin/specialites/update}" class="w-100">
+                <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="fw-bold"><i class="bi bi-pencil-square me-2 text-warning"></i>Modifier Spécialité</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <input type="hidden" name="id" id="sid">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Nom de la spécialité</label>
+                            <input class="form-control rounded-3 py-2" name="nom" id="snom" placeholder="Ex: Développement Web">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Enregistrer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- STYLE CSS -->
+    <style>
+        .table-hover tbody tr:hover { background-color: #f8faff !important; transition: 0.3s; }
+        .page-link { color: #6c757d; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: none; }
+        .page-item.active .page-link { background-color: #0d6efd !important; color: white !important; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3); }
+        .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); border-color: #0d6efd; }
+        .btn-light:hover { background-color: #f0f0f0; }
+    </style>
+
+    <!-- JS -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const editModalEl = new bootstrap.Modal(document.getElementById('editModal'));
+            const viewModalEl = new bootstrap.Modal(document.getElementById('viewModal'));
+
+            // EDIT
+            document.querySelectorAll(".edit-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    fetch("/admin/specialites/edit/" + btn.dataset.id)
+                        .then(r => r.json())
+                        .then(s => {
+                            document.getElementById('sid').value = s.id;
+                            document.getElementById('snom').value = s.nom;
+                            editModalEl.show();
+                        });
+                });
+            });
+
+            // VIEW
+            document.querySelectorAll(".view-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    fetch("/admin/specialites/edit/" + btn.dataset.id)
+                        .then(r => r.json())
+                        .then(s => {
+                            document.getElementById('v_nom').textContent = s.nom;
+                            // Optionnel : afficher l'ID dans le modal de vue
+                            if(document.getElementById('v_id_display'))
+                                document.getElementById('v_id_display').textContent = s.id;
+                            viewModalEl.show();
+                        });
+                });
+            });
+        });
+    </script>
 </div>
-
-<!-- JS -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    document.querySelectorAll(".edit-btn").forEach(btn => {
-        btn.onclick = () => {
-            fetch("/admin/specialites/edit/" + btn.dataset.id)
-                .then(r => r.json())
-                .then(s => {
-                    sid.value = s.id;
-                    snom.value = s.nom;
-                    new bootstrap.Modal(editModal).show();
-                });
-        };
-    });
-
-    document.querySelectorAll(".view-btn").forEach(btn => {
-        btn.onclick = () => {
-            fetch("/admin/specialites/edit/" + btn.dataset.id)
-                .then(r => r.json())
-                .then(s => {
-                    v_nom.textContent = s.nom;
-                    new bootstrap.Modal(viewModal).show();
-                });
-        };
-    });
-
-});
-</script>
-
-</body>
 </html>
